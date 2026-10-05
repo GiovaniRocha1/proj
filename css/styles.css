@@ -6,15 +6,21 @@ h1 {
     
 }
 
+.deeper-wrapper {
+    display: inline-flex;
+    justify-content: center; /* Centers the wrapper horizontally */
+    min-height: 50vh; /* Ensures it takes up the full viewport height */
+}
+
 .wrapper {
     display: grid;
-    place-items: center; /* Centers both horizontally and vertically */
-    min-height: 300px;
-    max-height: 600px;
+    min-height: 10vh;
+    max-height: 30vh;
     padding: 10px;
-    border: 2px solid #333;
-    max-width: 96vw; /* Limits the width to 96% of the width of the viewport */
-    margin: 10% auto;
+    border: 2px solid #b3a9a9;
+    border-radius: 10px;   
+    max-width: 50vw; /* Limits the width to 96% of the width of the viewport */
+    margin: 0 10px;
 }
 
 .box {
