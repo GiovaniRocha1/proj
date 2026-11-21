@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | ShopZone</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="item-detail-page">
+    <div id="header-placeholder"></div>
+
+    <main class="item-page">
+        <nav class="item-breadcrumb" aria-label="Breadcrumb">
+            <a href="dashboard.html">Home</a>
+            <span>/</span>
+            <a href="dashboard.html">Electronics</a>
+            <span>/</span>
+            <span>Wireless Headphones</span>
+        </nav>
+
+        <section class="item-card" aria-labelledby="item-title">
+            <div class="item-gallery">
+                <div class="item-main-image">
+                    <span class="item-badge">Best seller</span>
+                    <span class="item-product-emoji" aria-hidden="true">&#127911;</span>
+                    <button class="item-favorite" type="button" aria-label="Add to favorites">&#9825;</button>
+                </div>
+                <div class="item-thumbnails" aria-label="Product image thumbnails">
+                    <button class="item-thumbnail active" type="button" aria-label="View front"><span>&#127911;</span></button>
+                    <button class="item-thumbnail" type="button" aria-label="View side"><span>&#127911;</span></button>
+                    <button class="item-thumbnail" type="button" aria-label="View in use"><span>&#127911;</span></button>
+                </div>
+            </div>
+
+            <div class="item-details">
+                <p class="item-category">Electronics</p>
+                <h1 id="item-title">Wireless Noise-Canceling Headphones</h1>
+
+                <div class="item-rating">
+                    <span class="stars" aria-label="4.8 out of 5 stars">★★★★★</span>
+                    <strong>4.8</strong>
+                    <a href="#reviews">124 reviews</a>
+                </div>
+
+                <div class="item-price-row">
+                    <p class="item-price">$89.99</p>
+                    <span class="item-old-price">$119.99</span>
+                    <span class="item-discount">Save 25%</span>
+                </div>
+
+                <p class="item-description">Premium wireless headphones with active noise cancellation, all-day comfort, and crystal-clear sound. Built for work, travel, and everyday listening.</p>
+
+                <div class="item-option">
+                    <span>Color</span>
+                    <div class="color-options" aria-label="Choose color">
+                        <button class="color-option selected" type="button" style="--swatch:#334155" aria-label="Midnight"></button>
+                        <button class="color-option" type="button" style="--swatch:#dbeafe" aria-label="Cloud blue"></button>
+                        <button class="color-option" type="button" style="--swatch:#e2e8f0" aria-label="Silver"></button>
+                    </div>
+                </div>
+
+                <form class="add-to-cart-form" action="#" method="POST">
+                    <div class="quantity-control">
+                        <button type="button" class="quantity-minus" aria-label="Decrease quantity">−</button>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="99" required aria-label="Quantity">
+                        <button type="button" class="quantity-plus" aria-label="Increase quantity">+</button>
+                    </div>
+                    <button type="submit" class="add-to-cart-button">Add to cart</button>
+                </form>
+
+                <div class="item-meta">
+                    <div>
+                        <span class="meta-icon">&#10003;</span>
+                        <p><strong>In stock</strong><small>Ships in 1–2 business days</small></p>
+                    </div>
+                    <div>
+                        <span class="meta-icon">&#8634;</span>
+                        <p><strong>Free returns</strong><small>Within 30 days</small></p>
+                    </div>
+                </div>
+
+                <a class="item-edit-link" href="edit-product.html">Edit this product</a>
+            </div>
+        </section>
+
+        <section class="item-info-section" aria-labelledby="description-title">
+            <div>
+                <h2 id="description-title">Product details</h2>
+                <p>Designed for immersive listening, these wireless headphones combine adaptive noise cancellation with a lightweight fit and long battery life.</p>
+            </div>
+            <dl class="item-specs">
+                <div><dt>Battery life</dt><dd>Up to 40 hours</dd></div>
+                <div><dt>Connectivity</dt><dd>Bluetooth 5.3</dd></div>
+                <div><dt>Charging</dt><dd>USB-C fast charge</dd></div>
+                <div><dt>Warranty</dt><dd>2 years</dd></div>
+            </dl>
+        </section>
+
+        <section class="same-vendor-products" aria-labelledby="vendor-title">
+            <div class="vendor-heading">
+                <div>
+                    <p class="catalog-eyebrow">From the same collection</p>
+                    <h2 id="vendor-title">You may also like</h2>
+                </div>
+                <a href="dashboard.html">View all</a>
+            </div>
+            <div class="vendor-products">
+                <article class="vendor-product-card">
+                    <div class="vendor-product-image vendor-blue"><span aria-hidden="true">&#128266;</span></div>
+                    <p class="vendor-product-category">Electronics</p>
+                    <h3 class="vendor-product-name">Portable Bluetooth Speaker</h3>
+                    <div class="vendor-product-footer"><strong>$49.99</strong><button type="button">Add</button></div>
+                </article>
+                <article class="vendor-product-card">
+                    <div class="vendor-product-image vendor-purple"><span aria-hidden="true">&#127911;</span></div>
+                    <p class="vendor-product-category">Electronics</p>
+                    <h3 class="vendor-product-name">Studio Wireless Earbuds</h3>
+                    <div class="vendor-product-footer"><strong>$59.99</strong><button type="button">Add</button></div>
+                </article>
+                <article class="vendor-product-card">
+                    <div class="vendor-product-image vendor-green"><span aria-hidden="true">&#127918;</span></div>
+                    <p class="vendor-product-category">Electronics</p>
+                    <h3 class="vendor-product-name">Wireless Gaming Adapter</h3>
+                    <div class="vendor-product-footer"><strong>$39.99</strong><button type="button">Add</button></div>
+                </article>
+                <article class="vendor-product-card">
+                    <div class="vendor-product-image vendor-yellow"><span aria-hidden="true">&#128179;</span></div>
+                    <p class="vendor-product-category">Accessories</p>
+                    <h3 class="vendor-product-name">Premium Carrying Case</h3>
+                    <div class="vendor-product-footer"><strong>$24.99</strong><button type="button">Add</button></div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="JS/load-header.js"></script>
+    <script>
+        const quantityInput = document.getElementById('quantity');
+        document.querySelector('.quantity-minus').addEventListener('click', function () {
+            quantityInput.value = Math.max(1, Number(quantityInput.value) - 1);
+        });
+        document.querySelector('.quantity-plus').addEventListener('click', function () {
+            quantityInput.value = Math.min(99, Number(quantityInput.value) + 1);
+        });
+
+        document.querySelector('.item-favorite').addEventListener('click', function () {
+            const active = this.classList.toggle('active');
+            this.innerHTML = active ? '&#9829;' : '&#9825;';
+        });
+
+        document.querySelectorAll('.color-option').forEach(function (button) {
+            button.addEventListener('click', function () {
+                document.querySelectorAll('.color-option').forEach(function (item) {
+                    item.classList.remove('selected');
+                });
+                button.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.item-thumbnail').forEach(function (button) {
+            button.addEventListener('click', function () {
+                document.querySelectorAll('.item-thumbnail').forEach(function (item) {
+                    item.classList.remove('active');
+                });
+                button.classList.add('active');
+            });
+        });
+
+        document.querySelector('.add-to-cart-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const quantity = Number(quantityInput.value);
+            const button = this.querySelector('.add-to-cart-button');
+            button.textContent = 'Added to cart';
+            button.classList.add('added');
+
+            const updateCart = function () {
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = Number(cartCount.textContent) + quantity;
+                }
+            };
+            window.setTimeout(updateCart, 150);
+
+            window.setTimeout(function () {
+                button.textContent = 'Add to cart';
+                button.classList.remove('added');
+            }, 1200);
+        });
+    </script>
+</body>
+</html>
