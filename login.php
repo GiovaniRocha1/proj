@@ -1,3 +1,9 @@
+<?php
+session_start();
+$flashError = $_SESSION['flash_error'] ?? null;
+$flashSuccess = $_SESSION['flash_success'] ?? null;
+unset($_SESSION['flash_error'], $_SESSION['flash_success']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,10 +26,17 @@
                 <p>Enter your details to continue shopping.</p>
             </div>
 
-            <form class="login-form" action="dashboard.html" method="POST">
+            <?php if ($flashError): ?>
+                <p class="auth-message auth-error"><?php echo htmlspecialchars($flashError); ?></p>
+            <?php endif; ?>
+            <?php if ($flashSuccess): ?>
+                <p class="auth-message auth-success"><?php echo htmlspecialchars($flashSuccess); ?></p>
+            <?php endif; ?>
+
+            <form class="login-form" action="login_process.php" method="POST">
                 <div class="login-field">
-                    <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                    <label for="login">Login</label>
+                    <input type="text" id="login" name="login" placeholder="Enter your login" autocomplete="email" required>
                 </div>
 
                 <div class="login-field">
@@ -31,7 +44,7 @@
                         <label for="password">Password</label>
                         <a href="#" class="forgot-link">Forgot password?</a>
                     </div>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    <input type="password" id="password" name="senha" placeholder="Enter your password" autocomplete="current-password" required>
                 </div>
 
                 <label class="remember-row">
@@ -42,7 +55,7 @@
                 <button type="submit" class="login-button">Sign in</button>
             </form>
 
-            <p class="login-footer">Don't have an account? <a href="#">Create account</a></p>
+            <p class="login-footer">Don't have an account? <a href="register.php">Create account</a></p>
         </section>
     </main>
 </body>

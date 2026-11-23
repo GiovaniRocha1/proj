@@ -8,6 +8,26 @@ fetch('Defaults/Header.html')
   .then(html => {
     document.getElementById('header-placeholder').innerHTML = html;
 
+    function updateCartBadge() {
+      fetch('cart_count.php', { cache: 'no-store' })
+        .then(response => response.ok ? response.json() : Promise.reject(new Error('Failed to load cart count')))
+        .then(data => {
+          const cartCount = document.querySelector('.cart-count');
+          if (!cartCount) {
+            return;
+          }
+          const count = Number(data.count) || 0;
+          cartCount.textContent = String(count);
+          const cartLink = cartCount.closest('.cart-link');
+          if (cartLink) {
+            cartLink.setAttribute('aria-label', count + ' items in cart');
+          }
+        })
+        .catch(error => console.error(error));
+    }
+
+    updateCartBadge();
+
     const accountMenu = document.querySelector('.account-menu');
     const accountToggle = document.querySelector('.account-toggle');
 
