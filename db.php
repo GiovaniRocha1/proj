@@ -97,7 +97,7 @@ function display_category(string $category): string
 
 function format_currency(float $amount): string
 {
-    return 'US$ ' . number_format($amount, 2, ',', '.');
+    return 'R$ ' . number_format($amount, 2, ',', '.');
 }
 
 function display_order_status(string $status): string

@@ -14,7 +14,7 @@ unset($_SESSION['flash_error']);
 <body>
     <main class="login-page register-page">
         <section class="login-card register-card" aria-labelledby="register-title">
-            <a class="login-brand" href="index.html" aria-label="Página inicial da Online Store">
+            <a class="login-brand" href="login.php" aria-label="Página de login da Online Store">
                 <span class="brand-mark">S</span>
                 <span>Online Store</span>
             </a>

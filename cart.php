@@ -157,7 +157,7 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
     <script src="JS/load-header.js"></script>
     <script>
         function formatMoney(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(value);
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
         }
 
         function updateCart() {

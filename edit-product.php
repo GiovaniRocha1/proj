@@ -118,7 +118,7 @@ $_SESSION['product_form_token'] = bin2hex(random_bytes(32));
                         <div class="product-field">
                             <label for="preco">Preço</label>
                             <div class="input-prefix">
-                                <span>US$</span>
+                                <span>R$</span>
                                 <input type="number" id="preco" name="preco" value="<?php echo htmlspecialchars((string) $product['preco']); ?>" min="0" step="0.01" required>
                             </div>
                         </div>

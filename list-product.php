@@ -96,7 +96,7 @@ try {
                         <div class="product-field">
                             <label for="preco">Preço</label>
                             <div class="input-prefix">
-                                <span>US$</span>
+                                <span>R$</span>
                                 <input type="number" id="preco" name="preco" placeholder="0.00" min="0" step="0.01" required>
                             </div>
                         </div>
