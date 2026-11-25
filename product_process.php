@@ -6,7 +6,7 @@ session_start();
 require_once __DIR__ . '/db.php';
 
 if (!isset($_SESSION['user']['id_usuario'])) {
-    $_SESSION['flash_error'] = 'Please sign in to manage products.';
+    $_SESSION['flash_error'] = 'Entre na sua conta para gerenciar produtos.';
     header('Location: login.php');
     exit;
 }
@@ -22,7 +22,7 @@ $token = (string) ($_POST['csrf_token'] ?? '');
 $expectedToken = (string) ($_SESSION['product_form_token'] ?? '');
 
 if ($expectedToken === '' || !hash_equals($expectedToken, $token)) {
-    $_SESSION['product_form_error'] = 'Your form expired. Please try again.';
+    $_SESSION['product_form_error'] = 'O formulário expirou. Tente novamente.';
     header('Location: list-product.php');
     exit;
 }
@@ -34,7 +34,7 @@ try {
 
     if ($action === 'delete') {
         if (!$productId || $productId < 1) {
-            throw new RuntimeException('Invalid product.');
+            throw new RuntimeException('Produto inválido.');
         }
 
         $ownership = $pdo->prepare(
@@ -42,18 +42,18 @@ try {
         );
         $ownership->execute([$productId, $userId]);
         if (!$ownership->fetch()) {
-            throw new RuntimeException('Product not found or you do not have permission to delete it.');
+            throw new RuntimeException('Produto não encontrado ou você não tem permissão para excluí-lo.');
         }
 
         $orderItem = $pdo->prepare('SELECT id_item FROM itens_pedido WHERE id_produto = ? LIMIT 1');
         $orderItem->execute([$productId]);
         if ($orderItem->fetch()) {
-            throw new RuntimeException('This product is part of an order and cannot be deleted.');
+            throw new RuntimeException('Este produto faz parte de um pedido e não pode ser excluído.');
         }
 
         $delete = $pdo->prepare('DELETE FROM produto WHERE id_produto = ? AND id_usuario = ?');
         $delete->execute([$productId, $userId]);
-        $_SESSION['product_form_success'] = 'Product deleted.';
+        $_SESSION['product_form_success'] = 'Produto excluído.';
         header('Location: account.php');
         exit;
     }
@@ -64,22 +64,22 @@ try {
     $stock = filter_input(INPUT_POST, 'estoque', FILTER_VALIDATE_INT);
 
     if ($name === '' || strlen($name) > 200) {
-        throw new RuntimeException('Product name is required and must be at most 200 characters.');
+        throw new RuntimeException('Informe um nome para o produto com no máximo 200 caracteres.');
     }
     if (!$categoryId || $categoryId < 1) {
-        throw new RuntimeException('Select a valid product category.');
+        throw new RuntimeException('Selecione uma categoria válida.');
     }
     if ($price === false || $price < 0 || !is_finite((float) $price)) {
-        throw new RuntimeException('Enter a valid non-negative price.');
+        throw new RuntimeException('Informe um preço válido, igual ou superior a zero.');
     }
     if ($stock === false || $stock < 0 || $stock > 999999) {
-        throw new RuntimeException('Enter a valid stock quantity.');
+        throw new RuntimeException('Informe uma quantidade válida para o estoque.');
     }
 
     $category = $pdo->prepare('SELECT id_categoria FROM categorias WHERE id_categoria = ?');
     $category->execute([$categoryId]);
     if (!$category->fetch()) {
-        throw new RuntimeException('Select a valid product category.');
+        throw new RuntimeException('Selecione uma categoria válida.');
     }
 
     if ($action === 'create') {
@@ -88,14 +88,14 @@ try {
              VALUES (?, ?, ?, ?, ?)'
         );
         $statement->execute([$userId, $categoryId, $name, $price, $stock]);
-        $_SESSION['product_form_success'] = 'Product created successfully.';
+        $_SESSION['product_form_success'] = 'Produto anunciado com sucesso.';
         header('Location: account.php');
         exit;
     }
 
     if ($action === 'update') {
         if (!$productId || $productId < 1) {
-            throw new RuntimeException('Invalid product.');
+            throw new RuntimeException('Produto inválido.');
         }
         $statement = $pdo->prepare(
             'UPDATE produto
@@ -110,20 +110,20 @@ try {
             );
             $check->execute([$productId, $userId]);
             if (!$check->fetch()) {
-                throw new RuntimeException('Product not found or you do not have permission to edit it.');
+                throw new RuntimeException('Produto não encontrado ou você não tem permissão para editá-lo.');
             }
         }
 
-        $_SESSION['product_form_success'] = 'Product updated successfully.';
+        $_SESSION['product_form_success'] = 'Produto atualizado com sucesso.';
         header('Location: account.php');
         exit;
     }
 
-    throw new RuntimeException('Invalid product action.');
+    throw new RuntimeException('Ação de produto inválida.');
 } catch (RuntimeException $error) {
     $_SESSION['product_form_error'] = $error->getMessage();
 } catch (Throwable $error) {
-    $_SESSION['product_form_error'] = 'Could not save product changes. Please try again.';
+    $_SESSION['product_form_error'] = 'Não foi possível salvar as alterações do produto. Tente novamente.';
 }
 
 if ($action === 'update' && $productId) {

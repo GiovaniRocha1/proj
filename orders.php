@@ -6,7 +6,7 @@ session_start();
 require_once __DIR__ . '/db.php';
 
 if (!isset($_SESSION['user']['id_usuario'])) {
-    $_SESSION['flash_error'] = 'Please sign in to view your orders.';
+    $_SESSION['flash_error'] = 'Entre na sua conta para ver seus pedidos.';
     header('Location: login.php');
     exit;
 }
@@ -43,34 +43,34 @@ try {
         }
     }
 } catch (Throwable $error) {
-    $errorMessage = 'Could not load your orders. Please try again later.';
+    $errorMessage = 'Não foi possível carregar seus pedidos. Tente novamente mais tarde.';
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My orders | ShopZone</title>
+    <title>Meus pedidos | Online Store</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="orders-page">
     <div id="header-placeholder"></div>
 
     <main class="orders-main">
-        <nav class="orders-breadcrumb" aria-label="Breadcrumb">
-            <a href="dashboard.php">Home</a>
+        <nav class="orders-breadcrumb" aria-label="Caminho de navegação">
+            <a href="dashboard.php">Início</a>
             <span>/</span>
-            <span>My orders</span>
+            <span>Meus pedidos</span>
         </nav>
 
         <div class="orders-heading">
             <div>
-                <p class="orders-eyebrow">Purchase history</p>
-                <h1>My orders</h1>
-                <p>Review your recent orders and the items in each one.</p>
+                <p class="orders-eyebrow">Histórico de compras</p>
+                <h1>Meus pedidos</h1>
+                <p>Acompanhe seus pedidos recentes e os produtos de cada compra.</p>
             </div>
-            <a href="account.php">My account</a>
+            <a href="account.php">Minha conta</a>
         </div>
 
         <?php if ($errorMessage): ?>
@@ -78,34 +78,34 @@ try {
         <?php elseif (!$orders): ?>
             <section class="orders-empty">
                 <span aria-hidden="true">&#128230;</span>
-                <h2>No orders yet</h2>
-                <p>When you place an order, its details will appear here.</p>
-                <a href="dashboard.php">Browse products</a>
+                <h2>Você ainda não fez pedidos</h2>
+                <p>Quando fizer uma compra, os detalhes do pedido aparecerão aqui.</p>
+                <a href="dashboard.php">Ver produtos</a>
             </section>
         <?php else: ?>
-            <section class="orders-list" aria-label="Your orders">
+            <section class="orders-list" aria-label="Seus pedidos">
                 <?php foreach ($orders as $order): ?>
                     <?php $orderId = (int) $order['id_pedido']; ?>
                     <article class="order-card">
                         <header class="order-card-header">
                             <div>
-                                <span class="order-label">Order</span>
+                                <span class="order-label">Pedido</span>
                                 <h2>#<?php echo $orderId; ?></h2>
                             </div>
-                            <span class="order-status"><?php echo htmlspecialchars($order['status']); ?></span>
+                            <span class="order-status"><?php echo htmlspecialchars(display_order_status($order['status'])); ?></span>
                         </header>
 
                         <div class="order-meta">
                             <div>
-                                <span>Order date</span>
-                                <strong><?php echo htmlspecialchars($order['data_pedido']); ?></strong>
+                                <span>Data do pedido</span>
+                                <strong><?php echo date('d/m/Y', strtotime($order['data_pedido'])); ?></strong>
                             </div>
                             <div>
                                 <span>Total</span>
-                                <strong>$<?php echo number_format((float) $order['valor_total'], 2); ?></strong>
+                                <strong><?php echo format_currency((float) $order['valor_total']); ?></strong>
                             </div>
                             <div>
-                                <span>Delivery address</span>
+                                <span>Endereço de entrega</span>
                                 <strong><?php
                                     $deliveryAddress = array_filter([
                                         $order['endereco_entrega'],
@@ -115,12 +115,12 @@ try {
                                     ], static fn($value) => $value !== null && $value !== '');
                                     echo $deliveryAddress
                                         ? htmlspecialchars(implode(', ', $deliveryAddress))
-                                        : 'Not recorded';
+                                        : 'Não informado';
                                 ?></strong>
                             </div>
                             <div>
-                                <span>Payment method</span>
-                                <strong><?php echo htmlspecialchars((string) ($order['metodo_pagamento'] ?: 'Not recorded')); ?></strong>
+                                <span>Forma de pagamento</span>
+                                <strong><?php echo htmlspecialchars(display_payment_method($order['metodo_pagamento'])); ?></strong>
                             </div>
                         </div>
 
@@ -129,8 +129,8 @@ try {
                                 <div class="order-item">
                                     <span class="order-item-icon" aria-hidden="true">&#128230;</span>
                                     <span class="order-item-name"><?php echo htmlspecialchars($item['produto_nome']); ?></span>
-                                    <span class="order-item-quantity">Qty: <?php echo (int) $item['quantidade']; ?></span>
-                                    <strong>$<?php echo number_format((float) $item['preco'] * (int) $item['quantidade'], 2); ?></strong>
+                                    <span class="order-item-quantity">Qtd.: <?php echo (int) $item['quantidade']; ?></span>
+                                    <strong><?php echo format_currency((float) $item['preco'] * (int) $item['quantidade']); ?></strong>
                                 </div>
                             <?php endforeach; ?>
                         </div>

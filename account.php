@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/db.php';
 
 if (!isset($_SESSION['user']['id_usuario'])) {
-    $_SESSION['flash_error'] = 'Please sign in to view your account.';
+    $_SESSION['flash_error'] = 'Entre na sua conta para ver seu perfil.';
     header('Location: login.php');
     exit;
 }
@@ -25,7 +25,7 @@ try {
     $statement->execute([(int) $user['id_usuario']]);
     $products = $statement->fetchAll();
 } catch (Throwable $error) {
-    $productError = 'Could not load your product listings.';
+    $productError = 'Não foi possível carregar seus anúncios.';
 }
 
 $initials = '';
@@ -37,29 +37,29 @@ foreach (preg_split('/\s+/', trim((string) $user['nome'])) as $part) {
 $initials = substr($initials, 0, 2);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My account | ShopZone</title>
+    <title>Minha conta | Online Store</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="account-page">
     <div id="header-placeholder"></div>
 
     <main class="account-main">
-        <nav class="account-breadcrumb" aria-label="Breadcrumb">
-            <a href="dashboard.php">Home</a>
+        <nav class="account-breadcrumb" aria-label="Caminho de navegação">
+            <a href="dashboard.php">Início</a>
             <span>/</span>
-            <span>My account</span>
+            <span>Minha conta</span>
         </nav>
 
         <div class="account-heading">
             <div>
-                <p class="account-eyebrow">Personal dashboard</p>
-                <h1>My account</h1>
+                <p class="account-eyebrow">Área pessoal</p>
+                <h1>Minha conta</h1>
             </div>
-            <a class="account-edit-button" href="list-product.php">Add product</a>
+            <a class="account-edit-button" href="list-product.php">Anunciar produto</a>
         </div>
 
         <div class="account-layout">
@@ -67,50 +67,50 @@ $initials = substr($initials, 0, 2);
                 <div class="account-avatar"><?php echo htmlspecialchars($initials); ?></div>
                 <div class="account-profile-heading">
                     <h2 id="profile-name"><?php echo htmlspecialchars($user['nome']); ?></h2>
-                    <span>User type: <?php echo (int) $user['tipo']; ?></span>
+                    <span>Tipo de usuário: <?php echo (int) $user['tipo']; ?></span>
                 </div>
 
                 <dl class="account-details">
                     <div>
-                        <dt>Name</dt>
+                        <dt>Nome</dt>
                         <dd><?php echo htmlspecialchars($user['nome']); ?></dd>
                     </div>
                     <div>
-                        <dt>City</dt>
-                        <dd><?php echo htmlspecialchars((string) ($user['cidade'] ?? 'Not provided')); ?></dd>
+                        <dt>Cidade</dt>
+                        <dd><?php echo htmlspecialchars((string) (($user['cidade'] ?? '') !== '' ? $user['cidade'] : 'Não informada')); ?></dd>
                     </div>
                     <div>
-                        <dt>Age</dt>
+                        <dt>Idade</dt>
                         <dd><?php echo (int) $user['idade']; ?></dd>
                     </div>
                     <div>
-                        <dt>Email</dt>
+                        <dt>E-mail</dt>
                         <dd><?php echo htmlspecialchars($user['email']); ?></dd>
                     </div>
                     <div>
-                        <dt>Username</dt>
+                        <dt>Nome de usuário</dt>
                         <dd><?php echo htmlspecialchars($user['login']); ?></dd>
                     </div>
                     <div>
-                        <dt>Phone</dt>
-                        <dd><?php echo htmlspecialchars((string) ($user['telefone'] ?? 'Not provided')); ?></dd>
+                        <dt>Telefone</dt>
+                        <dd><?php echo htmlspecialchars((string) (($user['telefone'] ?? '') !== '' ? $user['telefone'] : 'Não informado')); ?></dd>
                     </div>
                     <div>
-                        <dt>Type</dt>
+                        <dt>Tipo</dt>
                         <dd><?php echo (int) $user['tipo']; ?></dd>
                     </div>
                 </dl>
 
-                <a class="account-list-button" href="list-product.php">List a new product</a>
+                <a class="account-list-button" href="list-product.php">Anunciar um produto</a>
             </aside>
 
             <section class="account-selling" aria-labelledby="selling-title">
                 <div class="account-section-heading">
                     <div>
-                        <p class="account-section-eyebrow">Seller activity</p>
-                        <h2 id="selling-title">Items up for selling</h2>
+                        <p class="account-section-eyebrow">Atividade de vendedor</p>
+                        <h2 id="selling-title">Meus anúncios</h2>
                     </div>
-                    <a href="list-product.php">Add product</a>
+                    <a href="list-product.php">Anunciar produto</a>
                 </div>
 
                 <?php if ($successMessage): ?>
@@ -123,9 +123,9 @@ $initials = substr($initials, 0, 2);
                     <?php if (!$productError && !$products): ?>
                         <div class="cart-empty">
                             <span>&#128230;</span>
-                            <h2>No products listed yet</h2>
-                            <p>Create a listing to start selling.</p>
-                            <a href="list-product.php">List a product</a>
+                            <h2>Você ainda não anunciou produtos</h2>
+                            <p>Crie um anúncio para começar a vender.</p>
+                            <a href="list-product.php">Anunciar produto</a>
                         </div>
                     <?php endif; ?>
                     <?php foreach ($products as $product): ?>
@@ -135,18 +135,18 @@ $initials = substr($initials, 0, 2);
                         $emoji = $slug === 'fashion' ? '&#128085;' : ($slug === 'home' ? '&#9749;' : ($slug === 'fitness' ? '&#127947;' : '&#128241;'));
                         ?>
                         <article class="selling-item">
-                            <a class="selling-image <?php echo $imageClass; ?>" href="item.php?id=<?php echo (int) $product['id_produto']; ?>" aria-label="View <?php echo htmlspecialchars($product['nome']); ?>">
+                            <a class="selling-image <?php echo $imageClass; ?>" href="item.php?id=<?php echo (int) $product['id_produto']; ?>" aria-label="Ver <?php echo htmlspecialchars($product['nome']); ?>">
                                 <span aria-hidden="true"><?php echo $emoji; ?></span>
                             </a>
                             <div class="selling-info">
-                                <p><?php echo htmlspecialchars($product['categoria']); ?></p>
+                                <p><?php echo htmlspecialchars(display_category($product['categoria'])); ?></p>
                                 <h3><?php echo htmlspecialchars($product['nome']); ?></h3>
                             </div>
                             <div class="selling-stock">
-                                <strong>$<?php echo number_format((float) $product['preco'], 2); ?></strong>
-                                <span><?php echo (int) $product['estoque']; ?> in stock</span>
+                                <strong><?php echo format_currency((float) $product['preco']); ?></strong>
+                                <span><?php echo (int) $product['estoque']; ?> em estoque</span>
                             </div>
-                            <a class="selling-edit" href="edit-product.php?id=<?php echo (int) $product['id_produto']; ?>">Edit</a>
+                            <a class="selling-edit" href="edit-product.php?id=<?php echo (int) $product['id_produto']; ?>">Editar</a>
                         </article>
                     <?php endforeach; ?>
                 </div>

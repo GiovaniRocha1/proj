@@ -4,19 +4,106 @@ require_once __DIR__ . '/db.php';
 
 $errorMessage = null;
 $products = [];
+$categories = [];
+$pageSize = 40;
+$sortOrders = [
+    'featured' => 'p.id_produto DESC',
+    'price-low' => 'p.preco ASC, p.id_produto DESC',
+    'price-high' => 'p.preco DESC, p.id_produto DESC',
+    'newest' => 'p.id_produto DESC',
+];
+$requestedSort = $_GET['sort'] ?? 'featured';
+$sort = is_string($requestedSort) && isset($sortOrders[$requestedSort])
+    ? $requestedSort
+    : 'featured';
+$requestedCategory = $_GET['category'] ?? '';
+$categoryFilter = is_string($requestedCategory)
+    ? strtolower(trim($requestedCategory))
+    : '';
+$requestedSearch = $_GET['q'] ?? '';
+$searchQuery = is_string($requestedSearch) ? trim($requestedSearch) : '';
+$searchQuery = substr($searchQuery, 0, 100);
+$currentPage = 1;
+$totalPages = 1;
+$totalProducts = 0;
+$offset = 0;
 
 try {
-    $statement = database()->prepare(
+    $pdo = database();
+    $categories = $pdo->query(
+        'SELECT DISTINCT nome FROM categorias ORDER BY nome'
+    )->fetchAll(PDO::FETCH_COLUMN);
+
+    $conditions = [];
+    $parameters = [];
+    if ($categoryFilter !== '') {
+        $conditions[] = 'LOWER(c.nome) = ?';
+        $parameters[] = $categoryFilter;
+    }
+    if ($searchQuery !== '') {
+        $conditions[] = 'LOWER(p.nome) LIKE ?';
+        $parameters[] = '%' . strtolower($searchQuery) . '%';
+    }
+    $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+
+    $countStatement = $pdo->prepare(
+        'SELECT COUNT(*)
+         FROM produto p
+         INNER JOIN categorias c ON c.id_categoria = p.id_categoria
+         ' . $whereClause
+    );
+    $countStatement->execute($parameters);
+    $totalProducts = (int) $countStatement->fetchColumn();
+    $totalPages = max(1, (int) ceil($totalProducts / $pageSize));
+
+    $requestedPage = $_GET['page'] ?? 1;
+    $requestedPage = is_scalar($requestedPage) ? filter_var($requestedPage, FILTER_VALIDATE_INT) : false;
+    $currentPage = min($totalPages, max(1, $requestedPage === false ? 1 : (int) $requestedPage));
+    $offset = ($currentPage - 1) * $pageSize;
+
+    $statement = $pdo->prepare(
         'SELECT p.id_produto, p.nome, p.preco, p.estoque, c.nome AS categoria
          FROM produto p
          INNER JOIN categorias c ON c.id_categoria = p.id_categoria
-         ORDER BY p.id_produto DESC'
+         ' . $whereClause . '
+         ORDER BY ' . $sortOrders[$sort] . '
+         LIMIT ' . $pageSize . ' OFFSET ' . $offset
     );
-    $statement->execute();
+    $statement->execute($parameters);
     $products = $statement->fetchAll();
 } catch (Throwable $error) {
-    $errorMessage = 'Could not load products from the database.';
+    $errorMessage = 'Não foi possível carregar os produtos.';
 }
+
+$baseQuery = [];
+if ($sort !== 'featured') {
+    $baseQuery['sort'] = $sort;
+}
+if ($categoryFilter !== '') {
+    $baseQuery['category'] = $categoryFilter;
+}
+if ($searchQuery !== '') {
+    $baseQuery['q'] = $searchQuery;
+}
+$pageUrl = static function (int $page) use ($baseQuery): string {
+    return 'dashboard.php?' . http_build_query($baseQuery + ['page' => $page]);
+};
+$filterUrl = static function (?string $category) use ($sort, $searchQuery): string {
+    $query = [];
+    if ($sort !== 'featured') {
+        $query['sort'] = $sort;
+    }
+    if ($category !== null) {
+        $query['category'] = $category;
+    }
+    if ($searchQuery !== '') {
+        $query['q'] = $searchQuery;
+    }
+
+    return 'dashboard.php' . ($query ? '?' . http_build_query($query) : '');
+};
+$firstProduct = $totalProducts > 0 ? $offset + 1 : 0;
+$lastProduct = $offset + count($products);
 
 $categoryStyles = [
     'electronics' => 'product-image-blue',
@@ -32,52 +119,41 @@ $categoryEmojis = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products | ShopZone</title>
+    <title>Loja virtual | Online Store</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="store-page">
     <div id="header-placeholder"></div>
 
     <main class="store-main">
-        <section class="store-hero" aria-labelledby="store-title">
-            <div>
-                <p class="store-eyebrow">Welcome to ShopZone</p>
-                <h1 id="store-title">Find something you love</h1>
-                <p>Explore popular products and everyday essentials.</p>
-            </div>
-            <div class="store-offer">
-                <span>Special offer</span>
-                <strong>Up to 30% off</strong>
-            </div>
-        </section>
 
         <section class="catalog" aria-labelledby="catalog-title">
             <div class="catalog-heading">
                 <div>
-                    <p class="catalog-eyebrow">Marketplace</p>
-                    <h2 id="catalog-title">Featured products</h2>
+                    <h2 id="catalog-title">Anúncios recentes</h2>
                 </div>
                 <label class="sort-control">
-                    <span>Sort:</span>
-                    <select aria-label="Sort products">
-                        <option>Featured</option>
-                        <option>Lowest price</option>
-                        <option>Highest price</option>
-                        <option>Newest</option>
+                    <span>Ordenar:</span>
+                    <select id="product-sort" aria-label="Ordenar produtos">
+                        <option value="featured" <?php echo $sort === 'featured' ? 'selected' : ''; ?>>Destaque</option>
+                        <option value="price-low" <?php echo $sort === 'price-low' ? 'selected' : ''; ?>>Menor preço</option>
+                        <option value="price-high" <?php echo $sort === 'price-high' ? 'selected' : ''; ?>>Maior preço</option>
+                        <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mais recentes</option>
                     </select>
                 </label>
             </div>
 
-            <div class="filter-row" aria-label="Product filters">
-                <button class="filter-chip active" type="button" data-category="all">All</button>
-                <?php foreach (array_unique(array_map(fn($product) => strtolower($product['categoria']), $products)) as $categoryName): ?>
-                    <button class="filter-chip" type="button" data-category="<?php echo htmlspecialchars($categoryName); ?>">
-                        <?php echo htmlspecialchars(ucfirst($categoryName)); ?>
-                    </button>
+            <div class="filter-row" aria-label="Filtros de produtos">
+                <a class="filter-chip <?php echo $categoryFilter === '' ? 'active' : ''; ?>" href="<?php echo htmlspecialchars($filterUrl(null)); ?>">Todas</a>
+                <?php foreach ($categories as $categoryName): ?>
+                    <?php $categorySlug = strtolower($categoryName); ?>
+                    <a class="filter-chip <?php echo $categoryFilter === $categorySlug ? 'active' : ''; ?>" href="<?php echo htmlspecialchars($filterUrl($categorySlug)); ?>">
+                        <?php echo htmlspecialchars(display_category($categoryName)); ?>
+                    </a>
                 <?php endforeach; ?>
             </div>
 
@@ -85,7 +161,7 @@ $categoryEmojis = [
                 <?php if ($errorMessage): ?>
                     <p class="auth-message auth-error"><?php echo htmlspecialchars($errorMessage); ?></p>
                 <?php elseif (!$products): ?>
-                    <p class="auth-message">No products are currently listed.</p>
+                    <p class="auth-message"><?php echo $searchQuery !== '' || $categoryFilter !== '' ? 'Nenhum produto encontrado com esses filtros.' : 'Nenhum produto anunciado no momento.'; ?></p>
                 <?php else: ?>
                     <?php foreach ($products as $index => $product): ?>
                         <?php
@@ -93,61 +169,73 @@ $categoryEmojis = [
                         $imageClass = $categoryStyles[$categorySlug] ?? 'product-image-blue';
                         $emoji = $categoryEmojis[$categorySlug] ?? '&#128230;';
                         ?>
-                        <article class="product-card" data-category="<?php echo htmlspecialchars($categorySlug); ?>" data-product-id="<?php echo (int) $product['id_produto']; ?>" role="link" tabindex="0" aria-label="View <?php echo htmlspecialchars($product['nome']); ?>">
+                        <article class="product-card" data-category="<?php echo htmlspecialchars($categorySlug); ?>" data-product-id="<?php echo (int) $product['id_produto']; ?>" data-price="<?php echo (float) $product['preco']; ?>" role="link" tabindex="0" aria-label="Ver <?php echo htmlspecialchars($product['nome']); ?>">
                             <div class="product-image <?php echo $imageClass; ?>">
-                                <?php if ($index === 0): ?>
-                                    <span class="product-badge">Latest</span>
+                                <?php if ($index === 0 && $currentPage === 1 && in_array($sort, ['featured', 'newest'], true)): ?>
+                                    <span class="product-badge">Recente</span>
                                 <?php endif; ?>
                                 <span class="product-emoji" aria-hidden="true"><?php echo $emoji; ?></span>
-                                <button class="favorite-button" type="button" aria-label="Add <?php echo htmlspecialchars($product['nome']); ?> to favorites">&#9825;</button>
                             </div>
                             <div class="product-content">
-                                <p class="product-category"><?php echo htmlspecialchars($product['categoria']); ?></p>
+                                <p class="product-category"><?php echo htmlspecialchars(display_category($product['categoria'])); ?></p>
                                 <h3><?php echo htmlspecialchars($product['nome']); ?></h3>
                                 <div class="product-footer">
-                                    <strong>$<?php echo number_format((float) $product['preco'], 2); ?></strong>
-                                    <span class="product-stock"><?php echo (int) $product['estoque']; ?> in stock</span>
+                                    <strong><?php echo format_currency((float) $product['preco']); ?></strong>
+                                    <span class="product-stock"><?php echo (int) $product['estoque']; ?> em estoque</span>
                                 </div>
                             </div>
                         </article>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+            <?php if (!$errorMessage && $totalProducts > 0): ?>
+                <div class="catalog-pagination">
+                    <p class="pagination-summary">Exibindo <?php echo $firstProduct; ?>–<?php echo $lastProduct; ?> de <?php echo $totalProducts; ?> produtos</p>
+                    <?php if ($totalPages > 1): ?>
+                        <nav class="pagination-controls" aria-label="Paginação do catálogo">
+                            <?php if ($currentPage > 1): ?>
+                                <a class="pagination-link" href="<?php echo htmlspecialchars($pageUrl($currentPage - 1)); ?>" aria-label="Página anterior">Anterior</a>
+                            <?php else: ?>
+                                <span class="pagination-link disabled" aria-disabled="true">Anterior</span>
+                            <?php endif; ?>
+                            <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
+                                <?php if ($pageNumber === $currentPage): ?>
+                                    <span class="pagination-link current" aria-current="page"><?php echo $pageNumber; ?></span>
+                                <?php else: ?>
+                                    <a class="pagination-link" href="<?php echo htmlspecialchars($pageUrl($pageNumber)); ?>" aria-label="Ir para a página <?php echo $pageNumber; ?>"><?php echo $pageNumber; ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                            <span class="pagination-status">Página <?php echo $currentPage; ?> de <?php echo $totalPages; ?></span>
+                            <?php if ($currentPage < $totalPages): ?>
+                                <a class="pagination-link" href="<?php echo htmlspecialchars($pageUrl($currentPage + 1)); ?>" aria-label="Próxima página">Próxima</a>
+                            <?php else: ?>
+                                <span class="pagination-link disabled" aria-disabled="true">Próxima</span>
+                            <?php endif; ?>
+                        </nav>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </section>
     </main>
 
     <script src="JS/load-header.js"></script>
     <script>
-        const filterButtons = document.querySelectorAll('.filter-chip');
         const productCards = document.querySelectorAll('.product-card');
-        const cartCount = document.querySelector('.cart-count');
+        const sortSelect = document.querySelector('#product-sort');
 
-        filterButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
-                filterButtons.forEach(function (item) {
-                    item.classList.remove('active');
-                });
-                button.classList.add('active');
-
-                const category = button.dataset.category;
-                productCards.forEach(function (card) {
-                    card.classList.toggle('hidden', category !== 'all' && card.dataset.category !== category);
-                });
-            });
-        });
-
-        document.querySelectorAll('.favorite-button').forEach(function (button) {
-            button.addEventListener('click', function () {
-                const active = button.classList.toggle('active');
-                button.innerHTML = active ? '&#9829;' : '&#9825;';
-            });
+        sortSelect.addEventListener('change', function () {
+            const url = new URL(window.location.href);
+            if (sortSelect.value === 'featured') {
+                url.searchParams.delete('sort');
+            } else {
+                url.searchParams.set('sort', sortSelect.value);
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
         });
 
         productCards.forEach(function (card) {
-            card.addEventListener('click', function (event) {
-                if (event.target.closest('.favorite-button')) {
-                    return;
-                }
+            card.addEventListener('click', function () {
                 window.location.href = 'item.php?id=' + encodeURIComponent(card.dataset.productId);
             });
             card.addEventListener('keydown', function (event) {
@@ -168,12 +256,6 @@ $categoryEmojis = [
                 const title = card.querySelector('h3').textContent.toLowerCase();
                 card.classList.toggle('hidden', query.length > 0 && !title.includes(query));
             });
-        });
-
-        document.addEventListener('submit', function (event) {
-            if (event.target.matches('.search')) {
-                event.preventDefault();
-            }
         });
     </script>
 </body>

@@ -6,7 +6,7 @@ session_start();
 require_once __DIR__ . '/db.php';
 
 if (!isset($_SESSION['user']['id_usuario'])) {
-    $_SESSION['flash_error'] = 'Please sign in before checkout.';
+    $_SESSION['flash_error'] = 'Entre na sua conta para finalizar a compra.';
     header('Location: login.php');
     exit;
 }
@@ -30,7 +30,7 @@ if (
     $country === '' || strlen($country) > 100 ||
     !in_array($paymentMethod, $paymentMethods, true)
 ) {
-    $_SESSION['checkout_error'] = 'Enter valid delivery and payment details.';
+    $_SESSION['checkout_error'] = 'Informe dados válidos de entrega e pagamento.';
     header('Location: checkout.php');
     exit;
 }
@@ -46,7 +46,7 @@ try {
     $cartStatement->execute([(int) $_SESSION['user']['id_usuario']]);
     $cartRows = $cartStatement->fetchAll();
     if (!$cartRows) {
-        throw new RuntimeException('Your cart is empty.');
+        throw new RuntimeException('Seu carrinho está vazio.');
     }
 
     $total = 0.0;
@@ -67,14 +67,15 @@ try {
         $product = $statement->fetch();
 
         if (!$product) {
-            throw new RuntimeException('A product in your cart no longer exists.');
+            throw new RuntimeException('Um produto do seu carrinho não está mais disponível.');
         }
 
         $stock = (int) $product['estoque'];
         $quantity = max(1, $requestedQuantity);
         if ($quantity > $stock) {
+            $unitLabel = $stock === 1 ? 'unidade' : 'unidades';
             throw new RuntimeException(
-                'Only ' . $stock . ' units of ' . $product['nome'] . ' are available.'
+                'Há apenas ' . $stock . ' ' . $unitLabel . ' de ' . $product['nome'] . ' disponíveis.'
             );
         }
 
@@ -129,7 +130,7 @@ try {
         ]);
 
         if ($stockStatement->rowCount() !== 1) {
-            throw new RuntimeException('Stock changed before checkout could finish.');
+            throw new RuntimeException('O estoque foi alterado antes da conclusão da compra.');
         }
     }
 
@@ -149,6 +150,6 @@ try {
     }
     $_SESSION['checkout_error'] = $error instanceof RuntimeException
         ? $error->getMessage()
-        : 'Could not place the order. Please try again.';
+        : 'Não foi possível concluir o pedido. Tente novamente.';
     header('Location: checkout.php');
 }

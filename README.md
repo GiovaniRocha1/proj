@@ -1,4 +1,4 @@
-# ShopZone
+# Online Store
 
 Run database setup and additive schema migrations from the project directory with PHP CLI:
 

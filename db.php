@@ -82,3 +82,46 @@ function set_user_cart_item(PDO $pdo, int $userId, int $productId, int $quantity
     );
     $statement->execute([$userId, $productId, $quantity]);
 }
+
+function display_category(string $category): string
+{
+    $labels = [
+        'electronics' => 'Eletrônicos',
+        'fashion' => 'Moda',
+        'fitness' => 'Esportes e fitness',
+        'home' => 'Casa',
+    ];
+
+    return $labels[strtolower(trim($category))] ?? $category;
+}
+
+function format_currency(float $amount): string
+{
+    return 'US$ ' . number_format($amount, 2, ',', '.');
+}
+
+function display_order_status(string $status): string
+{
+    $labels = [
+        'pending' => 'Pendente',
+        'processing' => 'Em processamento',
+        'shipped' => 'Enviado',
+        'delivered' => 'Entregue',
+        'cancelled' => 'Cancelado',
+    ];
+
+    return $labels[strtolower(trim($status))] ?? $status;
+}
+
+function display_payment_method(?string $method): string
+{
+    $labels = [
+        'not specified' => 'Não informado',
+        'cash on delivery' => 'Pagamento na entrega',
+        'bank transfer' => 'Transferência bancária',
+        'other' => 'Outro',
+    ];
+    $method = trim((string) $method);
+
+    return $labels[strtolower($method)] ?? ($method !== '' ? $method : 'Não informado');
+}

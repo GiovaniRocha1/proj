@@ -9,7 +9,7 @@ $errorMessage = null;
 
 if (!$productId) {
     http_response_code(404);
-    $errorMessage = 'Product not found.';
+    $errorMessage = 'Produto não encontrado.';
 } else {
     try {
         $statement = database()->prepare(
@@ -27,7 +27,7 @@ if (!$productId) {
 
         if (!$product) {
             http_response_code(404);
-            $errorMessage = 'Product not found.';
+            $errorMessage = 'Produto não encontrado.';
         } else {
             $relatedStatement = database()->prepare(
                 'SELECT p.id_produto, p.nome, p.preco, p.estoque, c.nome AS categoria
@@ -42,7 +42,7 @@ if (!$productId) {
         }
     } catch (Throwable $error) {
         http_response_code(500);
-        $errorMessage = 'Could not load product details.';
+        $errorMessage = 'Não foi possível carregar os detalhes do produto.';
     }
 }
 
@@ -60,26 +60,26 @@ $categoryEmojis = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $product ? htmlspecialchars($product['nome']) : 'Product'; ?> | ShopZone</title>
+    <title><?php echo $product ? htmlspecialchars($product['nome']) : 'Produto'; ?> | Loja virtual</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="item-detail-page">
     <div id="header-placeholder"></div>
 
     <main class="item-page">
-        <nav class="item-breadcrumb" aria-label="Breadcrumb">
-            <a href="dashboard.php">Home</a>
+        <nav class="item-breadcrumb" aria-label="Caminho de navegação">
+            <a href="dashboard.php">Início</a>
             <span>/</span>
             <?php if ($product): ?>
-            <a href="dashboard.php"><?php echo htmlspecialchars($product['categoria']); ?></a>
+            <a href="dashboard.php"><?php echo htmlspecialchars(display_category($product['categoria'])); ?></a>
             <span>/</span>
             <span><?php echo htmlspecialchars($product['nome']); ?></span>
             <?php else: ?>
-            <span>Product</span>
+            <span>Produto</span>
             <?php endif; ?>
         </nav>
 
@@ -87,52 +87,46 @@ $categoryEmojis = [
             <div class="item-gallery">
                 <div class="item-main-image">
                     <?php if ($product): ?>
-                    <span class="item-badge"><?php echo htmlspecialchars($product['categoria']); ?></span>
+                    <span class="item-badge"><?php echo htmlspecialchars(display_category($product['categoria'])); ?></span>
                     <?php endif; ?>
                     <span class="item-product-emoji" aria-hidden="true"><?php echo $product ? ($categoryEmojis[strtolower($product['categoria'])] ?? '&#128230;') : '&#128230;'; ?></span>
-                    <button class="item-favorite" type="button" aria-label="Add to favorites">&#9825;</button>
-                </div>
-                <div class="item-thumbnails" aria-label="Product image thumbnails">
-                    <button class="item-thumbnail active" type="button" aria-label="View front"><span>&#127911;</span></button>
-                    <button class="item-thumbnail" type="button" aria-label="View side"><span>&#127911;</span></button>
-                    <button class="item-thumbnail" type="button" aria-label="View in use"><span>&#127911;</span></button>
                 </div>
             </div>
 
             <div class="item-details">
                 <?php if ($errorMessage): ?>
-                    <p class="item-category">Unavailable</p>
+                    <p class="item-category">Indisponível</p>
                     <h1 id="item-title"><?php echo htmlspecialchars($errorMessage); ?></h1>
                 <?php else: ?>
-                <p class="item-category"><?php echo htmlspecialchars($product['categoria']); ?></p>
+                <p class="item-category"><?php echo htmlspecialchars(display_category($product['categoria'])); ?></p>
                 <h1 id="item-title"><?php echo htmlspecialchars($product['nome']); ?></h1>
 
                 <div class="item-price-row">
-                    <p class="item-price">$<?php echo number_format((float) $product['preco'], 2); ?></p>
+                    <p class="item-price"><?php echo format_currency((float) $product['preco']); ?></p>
                 </div>
 
                 <form class="add-to-cart-form" action="cart_action.php" method="POST">
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="id_produto" value="<?php echo (int) $product['id_produto']; ?>">
                     <div class="quantity-control">
-                        <button type="button" class="quantity-minus" aria-label="Decrease quantity">−</button>
-                        <input type="number" id="quantity" name="quantidade" value="1" min="1" max="<?php echo max(1, (int) $product['estoque']); ?>" required aria-label="Quantity">
-                        <button type="button" class="quantity-plus" aria-label="Increase quantity">+</button>
+                        <button type="button" class="quantity-minus" aria-label="Diminuir quantidade">−</button>
+                        <input type="number" id="quantity" name="quantidade" value="1" min="1" max="<?php echo max(1, (int) $product['estoque']); ?>" required aria-label="Quantidade">
+                        <button type="button" class="quantity-plus" aria-label="Aumentar quantidade">+</button>
                     </div>
                     <button type="submit" class="add-to-cart-button" <?php echo (int) $product['estoque'] < 1 ? 'disabled' : ''; ?>>
-                        <?php echo (int) $product['estoque'] < 1 ? 'Out of stock' : 'Add to cart'; ?>
+                        <?php echo (int) $product['estoque'] < 1 ? 'Sem estoque' : 'Adicionar ao carrinho'; ?>
                     </button>
                 </form>
 
                 <div class="item-meta">
                     <div>
                         <span class="meta-icon">&#10003;</span>
-                        <p><strong><?php echo (int) $product['estoque'] > 0 ? 'In stock' : 'Out of stock'; ?></strong><small><?php echo (int) $product['estoque']; ?> available</small></p>
+                        <p><strong><?php echo (int) $product['estoque'] > 0 ? 'Em estoque' : 'Sem estoque'; ?></strong><small><?php echo (int) $product['estoque']; ?> disponíveis</small></p>
                     </div>
                 </div>
 
                 <?php if (isset($_SESSION['user']['id_usuario']) && (int) $_SESSION['user']['id_usuario'] === (int) $product['id_usuario']): ?>
-                    <a class="item-edit-link" href="edit-product.php?id=<?php echo (int) $product['id_produto']; ?>">Edit this product</a>
+                    <a class="item-edit-link" href="edit-product.php?id=<?php echo (int) $product['id_produto']; ?>">Editar este produto</a>
                 <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -140,23 +134,22 @@ $categoryEmojis = [
 
         <section class="item-info-section" aria-labelledby="description-title">
             <div>
-                <h2 id="description-title">Product information</h2>
-                <p>Marketplace listing details stored from the product table.</p>
+                <h2 id="description-title">Informações do produto</h2>
+                <p>Dados do anúncio cadastrados na loja.</p>
             </div>
             <dl class="item-specs">
-                <div><dt>Category</dt><dd><?php echo $product ? htmlspecialchars($product['categoria']) : 'Unavailable'; ?></dd></div>
-                <div><dt>Price</dt><dd><?php echo $product ? '$' . number_format((float) $product['preco'], 2) : 'Unavailable'; ?></dd></div>
-                <div><dt>Stock</dt><dd><?php echo $product ? (int) $product['estoque'] : 'Unavailable'; ?></dd></div>
+                <div><dt>Categoria</dt><dd><?php echo $product ? htmlspecialchars(display_category($product['categoria'])) : 'Indisponível'; ?></dd></div>
+                <div><dt>Preço</dt><dd><?php echo $product ? format_currency((float) $product['preco']) : 'Indisponível'; ?></dd></div>
+                <div><dt>Estoque</dt><dd><?php echo $product ? (int) $product['estoque'] : 'Indisponível'; ?></dd></div>
             </dl>
         </section>
 
         <section class="same-vendor-products" aria-labelledby="vendor-title">
             <div class="vendor-heading">
                 <div>
-                    <p class="catalog-eyebrow">From the same collection</p>
-                    <h2 id="vendor-title">You may also like</h2>
+                    <h2 id="vendor-title">Mais produtos deste vendedor</h2>
                 </div>
-                <a href="dashboard.php">View all</a>
+                <a href="dashboard.php">Ver todos</a>
             </div>
             <div class="vendor-products">
                 <?php foreach ($relatedProducts as $related): ?>
@@ -166,19 +159,19 @@ $categoryEmojis = [
                     $relatedEmoji = $categoryEmojis[$relatedSlug] ?? '&#128230;';
                     ?>
                     <article class="vendor-product-card">
-                        <a href="item.php?id=<?php echo (int) $related['id_produto']; ?>" aria-label="View <?php echo htmlspecialchars($related['nome']); ?>">
+                        <a href="item.php?id=<?php echo (int) $related['id_produto']; ?>" aria-label="Ver <?php echo htmlspecialchars($related['nome']); ?>">
                             <div class="vendor-product-image <?php echo $relatedStyle; ?>"><span aria-hidden="true"><?php echo $relatedEmoji; ?></span></div>
                         </a>
-                        <p class="vendor-product-category"><?php echo htmlspecialchars($related['categoria']); ?></p>
+                        <p class="vendor-product-category"><?php echo htmlspecialchars(display_category($related['categoria'])); ?></p>
                         <h3 class="vendor-product-name"><?php echo htmlspecialchars($related['nome']); ?></h3>
                         <div class="vendor-product-footer">
-                            <strong>$<?php echo number_format((float) $related['preco'], 2); ?></strong>
-                            <a href="item.php?id=<?php echo (int) $related['id_produto']; ?>">View</a>
+                            <strong><?php echo format_currency((float) $related['preco']); ?></strong>
+                            <a href="item.php?id=<?php echo (int) $related['id_produto']; ?>">Ver</a>
                         </div>
                     </article>
                 <?php endforeach; ?>
                 <?php if (!$relatedProducts): ?>
-                    <p class="auth-message">No other listings are available from this seller.</p>
+                    <p class="auth-message">Este vendedor não tem outros anúncios disponíveis.</p>
                 <?php endif; ?>
             </div>
         </section>
@@ -198,11 +191,6 @@ $categoryEmojis = [
                 Number(quantityInput.max),
                 Math.max(1, Number(quantityInput.value) || 1)
             );
-        });
-
-        document.querySelector('.item-favorite').addEventListener('click', function () {
-            const active = this.classList.toggle('active');
-            this.innerHTML = active ? '&#9829;' : '&#9825;';
         });
 
         document.querySelectorAll('.color-option').forEach(function (button) {

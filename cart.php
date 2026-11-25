@@ -20,7 +20,7 @@ try {
         $_SESSION['cart'] = get_user_cart($pdo, (int) $_SESSION['user']['id_usuario']);
     }
 } catch (Throwable $error) {
-    $cartError = 'Could not load the cart items.';
+    $cartError = 'Não foi possível carregar os itens do carrinho.';
 }
 
 if ($_SESSION['cart'] && $pdo instanceof PDO) {
@@ -58,47 +58,47 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
             fn($item) => (int) $item['estoque'] > 0
         ));
     } catch (Throwable $error) {
-        $cartError = 'Could not load the cart items.';
+        $cartError = 'Não foi possível carregar os itens do carrinho.';
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping cart | ShopZone</title>
+    <title>Carrinho de compras | Online Store</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="cart-page">
     <div id="header-placeholder"></div>
 
     <main class="cart-main">
-        <nav class="cart-breadcrumb" aria-label="Breadcrumb">
-            <a href="dashboard.php">Home</a>
+        <nav class="cart-breadcrumb" aria-label="Caminho de navegação">
+            <a href="dashboard.php">Início</a>
             <span>/</span>
-            <span>Shopping cart</span>
+            <span>Carrinho de compras</span>
         </nav>
 
         <div class="cart-heading">
             <div>
-                <p class="cart-eyebrow">Your selection</p>
-                <h1>Shopping cart</h1>
+                <p class="cart-eyebrow">Sua seleção</p>
+                <h1>Carrinho de compras</h1>
             </div>
-            <span class="cart-item-total"><?php echo $itemCount . ($itemCount === 1 ? ' item' : ' items'); ?></span>
+            <span class="cart-item-total"><?php echo $itemCount . ($itemCount === 1 ? ' item' : ' itens'); ?></span>
         </div>
 
         <div class="cart-layout">
-            <section class="cart-items" aria-label="Items in your cart">
+            <section class="cart-items" aria-label="Itens no seu carrinho">
                 <?php if ($cartError): ?>
                     <p class="auth-message auth-error"><?php echo htmlspecialchars($cartError); ?></p>
                 <?php endif; ?>
                 <?php if (!$cartItems): ?>
                     <div class="cart-empty">
                         <span>&#128722;</span>
-                        <h2>Your cart is empty</h2>
-                        <p>Browse the store to add your favorites.</p>
-                        <a href="dashboard.php">Start shopping</a>
+                        <h2>Seu carrinho está vazio</h2>
+                        <p>Explore a loja e adicione produtos ao seu carrinho.</p>
+                        <a href="dashboard.php">Começar a comprar</a>
                     </div>
                 <?php else: ?>
                     <?php foreach ($cartItems as $item): ?>
@@ -107,22 +107,22 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
                         $imageClass = $categorySlug === 'fashion' ? 'cart-image-purple' : ($categorySlug === 'home' ? 'cart-image-green' : 'cart-image-blue');
                         ?>
                         <article class="cart-item" data-price="<?php echo (float) $item['preco']; ?>" data-product-id="<?php echo (int) $item['id_produto']; ?>" data-stock="<?php echo (int) $item['estoque']; ?>">
-                            <a class="cart-product-image <?php echo $imageClass; ?>" href="item.php?id=<?php echo (int) $item['id_produto']; ?>" aria-label="View <?php echo htmlspecialchars($item['nome']); ?>">
+                            <a class="cart-product-image <?php echo $imageClass; ?>" href="item.php?id=<?php echo (int) $item['id_produto']; ?>" aria-label="Ver <?php echo htmlspecialchars($item['nome']); ?>">
                                 <span class="product-emoji" aria-hidden="true"><?php echo $categorySlug === 'fashion' ? '&#128085;' : ($categorySlug === 'home' ? '&#9749;' : ($categorySlug === 'fitness' ? '&#127947;' : '&#128241;')); ?></span>
                             </a>
                             <div class="cart-item-details">
-                                <p class="cart-product-category"><?php echo htmlspecialchars($item['categoria']); ?></p>
+                                <p class="cart-product-category"><?php echo htmlspecialchars(display_category($item['categoria'])); ?></p>
                                 <h2><a href="item.php?id=<?php echo (int) $item['id_produto']; ?>"><?php echo htmlspecialchars($item['nome']); ?></a></h2>
-                                <p class="cart-product-meta">Category: <?php echo htmlspecialchars($item['categoria']); ?> <span>•</span> <?php echo (int) $item['estoque']; ?> in stock</p>
-                                <button class="cart-remove" type="button" data-product-id="<?php echo (int) $item['id_produto']; ?>">Remove</button>
+                                <p class="cart-product-meta">Categoria: <?php echo htmlspecialchars(display_category($item['categoria'])); ?> <span>•</span> <?php echo (int) $item['estoque']; ?> em estoque</p>
+                                <button class="cart-remove" type="button" data-product-id="<?php echo (int) $item['id_produto']; ?>">Remover</button>
                             </div>
                             <div class="cart-item-actions">
-                                <div class="cart-quantity" aria-label="Quantity">
-                                    <button type="button" class="cart-minus" aria-label="Decrease quantity">−</button>
-                                    <input type="number" name="quantidade" value="<?php echo (int) $item['quantidade']; ?>" min="1" max="<?php echo (int) $item['estoque']; ?>" aria-label="Quantity" data-product-id="<?php echo (int) $item['id_produto']; ?>">
-                                    <button type="button" class="cart-plus" aria-label="Increase quantity">+</button>
+                                <div class="cart-quantity" aria-label="Quantidade">
+                                    <button type="button" class="cart-minus" aria-label="Diminuir quantidade">−</button>
+                                    <input type="number" name="quantidade" value="<?php echo (int) $item['quantidade']; ?>" min="1" max="<?php echo (int) $item['estoque']; ?>" aria-label="Quantidade" data-product-id="<?php echo (int) $item['id_produto']; ?>">
+                                    <button type="button" class="cart-plus" aria-label="Aumentar quantidade">+</button>
                                 </div>
-                                <strong class="cart-line-price">$<?php echo number_format((float) $item['line_total'], 2); ?></strong>
+                                <strong class="cart-line-price"><?php echo format_currency((float) $item['line_total']); ?></strong>
                             </div>
                         </article>
                     <?php endforeach; ?>
@@ -130,25 +130,25 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
             </section>
 
             <aside class="cart-summary" aria-labelledby="summary-title">
-                <h2 id="summary-title">Order summary</h2>
+                <h2 id="summary-title">Resumo do pedido</h2>
 
                 <dl class="cart-totals">
                     <div>
                         <dt>Subtotal</dt>
-                        <dd id="cart-subtotal">$<?php echo number_format($subtotal, 2); ?></dd>
+                        <dd id="cart-subtotal"><?php echo format_currency($subtotal); ?></dd>
                     </div>
                     <div class="cart-total">
                         <dt>Total</dt>
-                        <dd id="cart-total">$<?php echo number_format($subtotal, 2); ?></dd>
+                        <dd id="cart-total"><?php echo format_currency($subtotal); ?></dd>
                     </div>
                 </dl>
 
-                <button type="button" class="checkout-button">Proceed to checkout</button>
-                <a class="continue-shopping" href="dashboard.php">Continue shopping</a>
+                <button type="button" class="checkout-button">Finalizar compra</button>
+                <a class="continue-shopping" href="dashboard.php">Continuar comprando</a>
 
                 <div class="checkout-security">
                     <span>&#128274;</span>
-                    <p><strong>Cart summary</strong><small>Based on product price and quantity</small></p>
+                    <p><strong>Resumo do carrinho</strong><small>Calculado com base no preço e na quantidade dos produtos</small></p>
                 </div>
             </aside>
         </div>
@@ -157,7 +157,7 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
     <script src="JS/load-header.js"></script>
     <script>
         function formatMoney(value) {
-            return '$' + value.toFixed(2);
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(value);
         }
 
         function updateCart() {
@@ -178,12 +178,15 @@ if ($_SESSION['cart'] && $pdo instanceof PDO) {
 
             document.getElementById('cart-subtotal').textContent = formatMoney(subtotal);
             document.getElementById('cart-total').textContent = formatMoney(subtotal);
-            document.querySelector('.cart-item-total').textContent = itemCount + (itemCount === 1 ? ' item' : ' items');
+            document.querySelector('.cart-item-total').textContent = itemCount + (itemCount === 1 ? ' item' : ' itens');
 
             const headerCount = document.querySelector('.cart-count');
             if (headerCount) {
                 headerCount.textContent = itemCount;
-                headerCount.closest('.cart-link').setAttribute('aria-label', itemCount + ' items in cart');
+                headerCount.closest('.cart-link').setAttribute(
+                    'aria-label',
+                    itemCount === 1 ? '1 item no carrinho' : itemCount + ' itens no carrinho'
+                );
             }
         }
 

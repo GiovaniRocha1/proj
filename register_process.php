@@ -21,25 +21,25 @@ $tipo = filter_input(INPUT_POST, 'tipo', FILTER_VALIDATE_INT) ?: 1;
 
 $errors = [];
 if ($nome === '' || strlen($nome) > 100) {
-    $errors[] = 'Enter a valid name.';
+    $errors[] = 'Informe um nome válido.';
 }
 if ($idade === false || $idade < 1 || $idade > 999) {
-    $errors[] = 'Enter a valid age.';
+    $errors[] = 'Informe uma idade válida.';
 }
 if ($cidade === '' || strlen($cidade) > 100) {
-    $errors[] = 'Enter a valid city.';
+    $errors[] = 'Informe uma cidade válida.';
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100) {
-    $errors[] = 'Enter a valid email.';
+    $errors[] = 'Informe um e-mail válido.';
 }
 if ($login === '' || strlen($login) > 40) {
-    $errors[] = 'Enter a valid username.';
+    $errors[] = 'Informe um nome de usuário válido.';
 }
 if (strlen($senha) < 6) {
-    $errors[] = 'Password must contain at least 6 characters.';
+    $errors[] = 'A senha deve ter pelo menos 6 caracteres.';
 }
 if (strlen($telefone) > 20) {
-    $errors[] = 'Phone number is too long.';
+    $errors[] = 'O telefone é muito longo.';
 }
 
 if ($errors) {
@@ -54,7 +54,7 @@ try {
     $statement = $pdo->prepare('SELECT id FROM login WHERE login = ?');
     $statement->execute([$login]);
     if ($statement->fetch()) {
-        $_SESSION['flash_error'] = 'That username is already in use.';
+        $_SESSION['flash_error'] = 'Esse nome de usuário já está em uso.';
         header('Location: register.php');
         exit;
     }
@@ -74,12 +74,12 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['flash_success'] = 'Account created successfully. Please sign in.';
+    $_SESSION['flash_success'] = 'Conta criada com sucesso. Faça login para continuar.';
     header('Location: login.php');
 } catch (Throwable $error) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    $_SESSION['flash_error'] = 'Could not create the account. Please try again.';
+    $_SESSION['flash_error'] = 'Não foi possível criar a conta. Tente novamente.';
     header('Location: register.php');
 }

@@ -14,7 +14,7 @@ $login = trim((string) ($_POST['login'] ?? ''));
 $senha = (string) ($_POST['senha'] ?? '');
 
 if ($login === '' || $senha === '') {
-    $_SESSION['flash_error'] = 'Enter your login and password.';
+    $_SESSION['flash_error'] = 'Informe seu nome de usuário e sua senha.';
     header('Location: login.php');
     exit;
 }
@@ -32,7 +32,7 @@ try {
     $account = $statement->fetch();
 
     if (!$account || !password_verify($senha, $account['senha'])) {
-        $_SESSION['flash_error'] = 'Invalid login or password.';
+        $_SESSION['flash_error'] = 'Nome de usuário ou senha inválidos.';
         header('Location: login.php');
         exit;
     }
@@ -86,13 +86,13 @@ try {
         }
         unset($_SESSION['user']);
         $_SESSION['cart'] = $guestCart;
-        $_SESSION['flash_error'] = 'Could not load your saved cart. Please try again.';
+        $_SESSION['flash_error'] = 'Não foi possível carregar seu carrinho salvo. Tente novamente.';
         header('Location: login.php');
         exit;
     }
 
     header('Location: dashboard.php');
 } catch (Throwable $error) {
-    $_SESSION['flash_error'] = 'Could not sign in. Please try again.';
+    $_SESSION['flash_error'] = 'Não foi possível entrar. Tente novamente.';
     header('Location: login.php');
 }

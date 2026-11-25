@@ -19,7 +19,7 @@ if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
 }
 
 if (!$productId || $productId < 1) {
-    $_SESSION['cart_error'] = 'The selected product is invalid.';
+    $_SESSION['cart_error'] = 'O produto selecionado é inválido.';
     header('Location: cart.php');
     exit;
 }
@@ -33,7 +33,7 @@ try {
     $product = $statement->fetch();
 
     if (!$product) {
-        $_SESSION['cart_error'] = 'The selected product was not found.';
+        $_SESSION['cart_error'] = 'O produto selecionado não foi encontrado.';
         header('Location: cart.php');
         exit;
     }
@@ -45,19 +45,20 @@ try {
     } elseif ($action === 'set') {
         if ($stock < 1) {
             unset($_SESSION['cart'][$productId]);
-            $_SESSION['cart_error'] = 'This product is out of stock.';
+            $_SESSION['cart_error'] = 'Este produto está sem estoque.';
         } else {
             $requested = $quantity === false ? 1 : (int) $quantity;
             $requested = max(1, $requested);
             $_SESSION['cart'][$productId] = min($requested, $stock);
             if ($requested > $stock) {
-                $_SESSION['cart_error'] = 'Only ' . $stock . ' items are available in stock.';
+                $unitLabel = $stock === 1 ? 'unidade' : 'unidades';
+                $_SESSION['cart_error'] = 'Há apenas ' . $stock . ' ' . $unitLabel . ' deste produto em estoque.';
             }
         }
     } elseif ($action === 'add') {
         if ($stock < 1) {
             unset($_SESSION['cart'][$productId]);
-            $_SESSION['cart_error'] = 'This product is out of stock.';
+            $_SESSION['cart_error'] = 'Este produto está sem estoque.';
         } else {
             $requested = $quantity === false ? 1 : (int) $quantity;
             $requested = max(1, $requested);
@@ -65,11 +66,12 @@ try {
             $newQuantity = min($current + $requested, $stock);
             $_SESSION['cart'][$productId] = $newQuantity;
             if ($current + $requested > $stock) {
-                $_SESSION['cart_error'] = 'Only ' . $stock . ' items are available in stock.';
+                $unitLabel = $stock === 1 ? 'unidade' : 'unidades';
+                $_SESSION['cart_error'] = 'Há apenas ' . $stock . ' ' . $unitLabel . ' deste produto em estoque.';
             }
         }
     } else {
-        $_SESSION['cart_error'] = 'Invalid cart action.';
+        $_SESSION['cart_error'] = 'Ação inválida para o carrinho.';
     }
 
     if (isset($_SESSION['user']['id_usuario']) && in_array($action, ['add', 'set', 'remove'], true)) {
@@ -81,7 +83,7 @@ try {
         );
     }
 } catch (Throwable $error) {
-    $_SESSION['cart_error'] = 'Could not update the cart.';
+    $_SESSION['cart_error'] = 'Não foi possível atualizar o carrinho.';
 }
 
 header('Location: cart.php');
